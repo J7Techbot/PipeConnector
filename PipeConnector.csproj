@@ -7,7 +7,7 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageId>JZsPipeConnector</PackageId>
     <Title>Two way pipe connector</Title>
-    <Version>1.0.6</Version>
+    <Version>1.0.7</Version>
     <Authors>Jan Zeman</Authors>
     <Product>PipeConnector</Product>
   </PropertyGroup>

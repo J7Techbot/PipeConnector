@@ -1,23 +1,29 @@
-﻿using Microsoft.Extensions.Hosting;
-using PipeConnector.Enums;
-using System;
-using System.Collections.Generic;
+﻿using PipeConnector.Enums;
 using System.IO.Pipes;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace PipeConnector
 {
+    /// <summary>
+    /// Manage named pipes for easy communication.
+    /// </summary>
     public class PipeService : IDisposable
     {
         private NamedPipeClientStream? _readStream;
         private NamedPipeServerStream? _writeStream;
 
+        //invoked when message from other side is recieved
         public Action<PipeService, object>? MessageRecieved;
-        public Action<PipeService, object>? ConnectionEstablished;
 
-        //connect to pipes
+        /// <summary>
+        /// Create connection for writing and process for reading. 
+        /// If there is only one client/server, both sides use same client/server pipe identifiers e.g. clientPipe/serverPipe = clientPipe0/serverPipe0 
+        /// </summary>
+        /// <param name="clientPipe">identifier of writing pipe</param>
+        /// <param name="serverPipe">identifier of reading pipe</param>
+        /// <param name="consumerType">identifier of side which call this func</param>
+        /// <param name="messageRecieved">invoked when message from opposite side is recieved</param>
+        /// <param name="connected">invoked when the connection was successfully established</param>
         public void EstablishConnection(PipeType clientPipe, PipeType serverPipe, ConsumerType consumerType, Action<PipeService, object> messageRecieved, Action<bool,string> connected)
         {
             MessageRecieved = messageRecieved;
@@ -32,6 +38,11 @@ namespace PipeConnector
             }
         }
        
+        /// <summary>
+        /// Send message to other side.
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns>if sending was not succesful, return NOK, else OK</returns>
         public ConfirmType SendMessage(object message)
         {
             if (_writeStream != null && _writeStream.IsConnected)
@@ -56,6 +67,14 @@ namespace PipeConnector
 
             return ConfirmType.NOK;
         }
+
+        /// <summary>
+        /// Sets connections of pipes.
+        /// </summary>
+        /// <param name="clientStreamName"></param>
+        /// <param name="serverStreamName"></param>
+        /// <param name="consumerType"></param>
+        /// <returns></returns>
         private async Task ConnectPipesAsync(string clientStreamName, string serverStreamName, ConsumerType consumerType)
         {
             if (consumerType == ConsumerType.client)
@@ -75,6 +94,11 @@ namespace PipeConnector
                 await _writeStream.WaitForConnectionAsync();
             }
         }
+
+        /// <summary>
+        /// Process of reading.
+        /// </summary>
+        /// <returns></returns>
         private async Task ReadAsync()
         {
             if (_readStream != null)
@@ -91,15 +115,14 @@ namespace PipeConnector
             }            
         }
 
+        /// <summary>
+        /// IDisposable
+        /// </summary>
         public void Dispose()
         {
             _readStream?.Dispose();
             _writeStream?.Dispose();
         }
-        public void DisposeConnection()
-        {
-            _readStream?.Dispose();
-            _writeStream?.Dispose();
-        }
+
     }
 }
