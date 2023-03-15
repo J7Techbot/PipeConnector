@@ -5,7 +5,7 @@ using System.IO.Pipes;
 namespace PipeConnector
 {
     /// <summary>
-    /// Manage named pipes for easy communication.
+    /// Manage named pipes for easy communication. :) 
     /// </summary>
     public class PipeService : IDisposable
     {
